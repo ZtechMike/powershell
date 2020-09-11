@@ -1,8 +1,10 @@
 <#
 .SYNOPSIS
-    This Script will gather information from a Veeam Cloud Connect Server and determine how much space can be offloaded to Capacity Tier in a SOBR configuration
+    Estimates Capacity Tier size for new SOBR
 .DESCRIPTION
-    Long description
+    This Script will gather information from a Veeam Cloud Connect Server and estimate how much space can be offloaded to Capacity Tier in a SOBR configuration.
+.PARAMETER DAYS
+    Move backup files older than XX days to Capacity Tier
 .INPUTS
     Inputs to this cmdlet (if any)
 .OUTPUTS
@@ -11,7 +13,10 @@
 
 #>
 [cmdletbinding()]
-param()
+param(
+    [Parameter(Mandatory = $true)]
+    [int] $Days = $true
+)
 
 # Registering VeeamPSSnapin if necessary
 Write-Verbose "Registering Veeam PowerShell Snapin"
@@ -21,8 +26,10 @@ foreach ($snapin in (Get-PSSnapin)) {
 }
 if ($registered -eq $false) { Add-PSSnapin VeeamPSSnapin }
 
-# Create ArrayList for output
+# Creating empty ArrayList
 $aResults = [System.Collections.ArrayList]::new()
+
+##### Data collection begins here #####
 
 # Retrieving all Cloud Connect Tenants
 $tenants = Get-VBRCloudTenant
@@ -41,7 +48,7 @@ foreach ($tenant in $tenants) {
         }
 
         Write-Verbose "Analyzing tenant backups located on $($repo.name)"
-        $backups = $repo.GetBackups()
+        $backups = $repo.GetBackups() #undocumented API call
 
         # All backups for all tenants at least on this repo
         foreach ($backup in $backups) {
@@ -86,8 +93,8 @@ foreach ($tenant in $tenants) {
                     GfsPeriod    = $file.GfsPeriod
                     JobName      = $backup.JobName
                 }
-                # Add data to Array
-                $aResults.Add($fileDetail)
+                # Add data to ArrayList
+                $aResults.Add($fileDetail) | Out-Null
             }
         }
     }
@@ -96,9 +103,9 @@ foreach ($tenant in $tenants) {
 # Eliminating duplicate files (caused by GetAllStorages & GetAllChildrenStorages)
 $aResults = $aResults | Sort-Object -Property Id -Unique
 
-#$datestring = (Get-Date).ToString("s").Replace(":", "-")
-#$outfile = "c:\temp\GFSReport_$datestring.csv"
-#$aResults | Export-Csv $outfile
+##### Parsing data & applying logic for final report #####
+
+
 
 
 
