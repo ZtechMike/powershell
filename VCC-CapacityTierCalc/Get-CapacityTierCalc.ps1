@@ -2,7 +2,7 @@
 .SYNOPSIS
     Estimates Capacity Tier size for new SOBR
 .DESCRIPTION
-    This Script will gather information from a Veeam Cloud Connect Server and estimate how much space can be offloaded to Capacity Tier in a SOBR configuration. NOTE: This can only be used for a Backup Repository or a SOBR where Capacity Tier is currently disabled.
+    This script will gather information from a Veeam Cloud Connect Server and estimate how much space can be offloaded to Capacity Tier in a SOBR configuration. NOTE: This can only be used for a Standard Backup Repository or a SOBR where Capacity Tier is currently disabled.
 .PARAMETER DAYS
     Number of days to keep backups in the Performance Tier before moving them to the Capacity Tier (object storage)
 .OUTPUTS
