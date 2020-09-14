@@ -2,16 +2,38 @@
 .SYNOPSIS
     Estimates Capacity Tier size for new SOBR
 .DESCRIPTION
-    This Script will gather information from a Veeam Cloud Connect Server and estimate how much space can be offloaded to Capacity Tier in a SOBR configuration.
+    This Script will gather information from a Veeam Cloud Connect Server and estimate how much space can be offloaded to Capacity Tier in a SOBR configuration. NOTE: This can only be used for a Backup Repository or a SOBR where Capacity Tier is currently disabled.
 .PARAMETER DAYS
-    Move backup files older than XX days to Capacity Tier
-.INPUTS
-    Inputs to this cmdlet (if any)
+    Number of days to keep backups in the Performance Tier before moving them to the Capacity Tier (object storage)
 .OUTPUTS
-    Output from this cmdlet (if any)
-.NOTES
+    Get-CapacityTierCalc returns a PowerShell object containing Capacity Tier size report
+.EXAMPLE
+    Get-CapacityTierCalc.ps1 -Days 7
 
+	Description
+	-----------
+    Generate a Capacity Tier size report using the specified Days as the offload period
+.EXAMPLE
+    Get-CapacityTierCalc.ps1 -Days 14 -Verbose
+
+	Description
+	-----------
+	Verbose output is supported
+.NOTES
+	NAME:  Get-CapacityTierCalc.ps1
+	VERSION: 1.0
+	AUTHOR: Mike Zollmann, Chris Arceneaux
+    TWITTER: @ZtechMike, @chris_arceneaux
+    GITHUB: https://github.com/ZtechMike
+	GITHUB: https://github.com/carceneaux
+.LINK
+    https://arsano.ninja/
+.LINK
+    https://helpcenter.veeam.com/docs/backup/vsphere/capacity_tier_inactive_backup_chain.html?ver=100
+.LINK
+    https://helpcenter.veeam.com/docs/backup/vsphere/new_capacity_tier.html?ver=100
 #>
+#Requires -Version 5.1
 [cmdletbinding()]
 param(
     [Parameter(Mandatory = $true)]
@@ -241,14 +263,14 @@ foreach ($repo in $repos) {
     Write-Verbose "Non-GFS: $nonGfsCount"
 
     # Summing up totals
-    $gfsSizeGb = ($offload | Where-Object { ($_.RepoName -eq $repo ) -and ($_.GfsPeriod -ne "None") } | Measure-Object BackupSizeGB -Sum).Sum
-    $nonGfsSizeGb = ($offload | Where-Object { ($_.RepoName -eq $repo) -and ($_.GfsPeriod -eq "None") } | Measure-Object BackupSizeGB -Sum).Sum
+    $gfsSizeGB = ($offload | Where-Object { ($_.RepoName -eq $repo ) -and ($_.GfsPeriod -ne "None") } | Measure-Object BackupSizeGB -Sum).Sum
+    $nonGfsSizeGB = ($offload | Where-Object { ($_.RepoName -eq $repo) -and ($_.GfsPeriod -eq "None") } | Measure-Object BackupSizeGB -Sum).Sum
 
     $row = [PSCustomObject]@{
         Repository   = $repo
         SOBR         = $sobr
-        GfsSizeGB    = if ($gfsSizeGb){ $gfsSizeGb } else { 0 }
-        NonGfsSizeGb = if ($nonGfsSizeGb){ $nonGfsSizeGb } else { 0 }
+        GfsSizeGB    = if ($gfsSizeGB){ $gfsSizeGB } else { 0 }
+        NonGfsSizeGB = if ($nonGfsSizeGB){ $nonGfsSizeGB } else { 0 }
     }
     # Add data to output
     $output.Add($row) | Out-Null
