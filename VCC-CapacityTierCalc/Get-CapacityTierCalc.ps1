@@ -37,7 +37,7 @@
 [cmdletbinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [int] $Days = $true
+    [int] $Days
 )
 
 # Registering VeeamPSSnapin if necessary
