@@ -10,22 +10,22 @@
 .EXAMPLE
     Get-CapacityTierCalc.ps1 -Days 7
 
-	Description
-	-----------
+    Description
+    -----------
     Generate a Capacity Tier size report using the specified Days as the offload period
 .EXAMPLE
     Get-CapacityTierCalc.ps1 -Days 14 -Verbose
 
-	Description
-	-----------
-	Verbose output is supported
+    Description
+    -----------
+    Verbose output is supported
 .NOTES
-	NAME:  Get-CapacityTierCalc.ps1
-	VERSION: 1.0
-	AUTHOR: Mike Zollmann, Chris Arceneaux
+    NAME:  Get-CapacityTierCalc.ps1
+    VERSION: 1.0
+    AUTHOR: Mike Zollmann, Chris Arceneaux
     TWITTER: @ZtechMike, @chris_arceneaux
     GITHUB: https://github.com/ZtechMike
-	GITHUB: https://github.com/carceneaux
+    GITHUB: https://github.com/carceneaux
 .LINK
     https://arsano.ninja/
 .LINK
