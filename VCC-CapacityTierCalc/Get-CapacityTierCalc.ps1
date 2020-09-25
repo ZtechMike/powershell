@@ -58,8 +58,8 @@ Write-Verbose "Starting data collection..."
 
 # Retrieving Cloud Connect Information
 $tenants = Get-VBRCloudTenant
-$repoList.Add((Get-VBRBackupRepository)) | Out-Null
-$repoList.Add((Get-VBRBackupRepository -ScaleOut)) | Out-Null
+$null = $repoList.Add((Get-VBRBackupRepository))
+$null = $repoList.Add((Get-VBRBackupRepository -ScaleOut))
 
 # Looping through tenants
 foreach ($tenant in $tenants) {
@@ -104,7 +104,7 @@ foreach ($tenant in $tenants) {
                 }
 
                 # Get VM ID: RegEx matches everything up to character and date string: "D2020-01-01"
-                $file.FilePath.ToString() -match "^.*(?=(D\d{4}-\d{2}-\d{2}))" | Out-Null
+                $null = $file.FilePath.ToString() -match "^.*(?=(D\d{4}-\d{2}-\d{2}))"
                 $vmID = $Matches[0]
 
                 # Get BackupSize of file
@@ -140,7 +140,7 @@ foreach ($tenant in $tenants) {
                     ParentBackupId = $backup.ParentBackupId.Guid
                 }
                 # Add data to ArrayList
-                $aResults.Add($fileDetail) | Out-Null
+                $null = $aResults.Add($fileDetail)
             }
         }
     }
@@ -168,7 +168,7 @@ Write-Verbose "GFS: $($gfs.count) - Non-GFS: $($notGfs.count) - Total: $($aResul
 # Is older than $Days?
 $offload_gfs = $gfs | Where-Object { (New-TimeSpan $_.CreationTime $current).TotalDays -gt $Days }
 foreach ($item in $offload_gfs) {
-    $offload.Add($item) | Out-Null
+    $null = $offload.Add($item)
 }
 
 ### NOT GFS
@@ -209,7 +209,7 @@ foreach ($tenant in $tenants) {
         elseif ($files.FileName -match ".vrb") {
             # Backup Mode: Reverse Incremental
             # Finding all backups previous to the most recent full backup
-            $files = $files | Where-Object { (New-TimeSpan $_.CreationTime $latest.CreationTime).TotalSeconds -le 0 } | Sort-Object CreationTime -Descending  #sort newest to oldest
+            $files = $files | Where-Object { (New-TimeSpan $_.CreationTime $latest.CreationTime).TotalSeconds -lt 0 } | Sort-Object CreationTime -Descending  #sort newest to oldest
             # Finding where inactive chain begins
             switch ($true) {
                 ("Full" -eq $files[0].BackupType) {
@@ -238,14 +238,12 @@ foreach ($tenant in $tenants) {
         $offload_nonGfs = $inactive | Where-Object { (New-TimeSpan $_.CreationTime $current).TotalDays -gt $Days }
         if ($offload_nonGfs) {
             foreach ($item in $offload_nonGfs) {
-                $offload.Add($item) | Out-Null
+                $null = $offload.Add($item)
             }
         }
     }
 }
 
-# Sample output format
-#Repository | SOBR | GFS | Sealed | Unsealed | CapacityTierGB
 
 # Creating empty ArrayList
 $output = [System.Collections.ArrayList]::new()
@@ -273,7 +271,7 @@ foreach ($repo in $repos) {
         NonGfsSizeGB = if ($nonGfsSizeGB){ $nonGfsSizeGB } else { 0 }
     }
     # Add data to output
-    $output.Add($row) | Out-Null
+    $null = $output.Add($row)
 }
 Write-Verbose "Total amount to be offloaded: $(($offload | Measure-Object BackupSizeGB -Sum).Sum)GB"
 Write-Verbose "################################"
