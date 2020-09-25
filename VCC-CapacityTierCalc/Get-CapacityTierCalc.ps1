@@ -89,10 +89,20 @@ foreach ($tenant in $tenants) {
             }
 
             # retrieves all files related to backup
+            $fileList = [System.Collections.ArrayList]::new()
+            
             $files = $backup.GetAllStorages()
-            $files += $backup.GetAllChildrenStorages()
+            
+            foreach ($item in $files) {
+                $null = $fileList.Add($item)
+            }
 
-            foreach ($file in $files) {
+            $files = $backup.GetAllChildrenStorages()
+            foreach ($item in $files) {
+                $null = $fileList.Add($item)
+            }
+
+            foreach ($file in $fileList) {
                 #Write-Verbose "$($tenant.name): Analyzing file ($($file.FilePath.ToString()))"
 
                 # Determine if file is Full or Incremental
